@@ -4,8 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SpotService {
+public class SpotServiceApp {
     public static void main(String[] args) {
-        SpringApplication.run(SpotService.class, args);
+        SpringApplication.run(SpotServiceApp.class, args);
     }
 }

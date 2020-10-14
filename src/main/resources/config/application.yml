@@ -5,6 +5,8 @@ spring:
         url: jdbc:postgresql://localhost:5432/postgres
         username: postgres
         password: 1987
+        schema: classpath*:database/initDB.sql
+        initialization-mode: always
     jpa:
         database: postgresql
         database-platform: org.hibernate.dialect.PostgreSQL10Dialect

@@ -1,29 +1,48 @@
 package ru.kulikovskiy.spotservice.restcontroller;
 
-import org.springframework.context.ApplicationContext;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import ru.kulikovskiy.jkh.jkhdataloader.model.JkhDataLoaderAllResponse;
-import ru.kulikovskiy.jkh.jkhdataloader.service.StreetService;
+import org.springframework.web.bind.annotation.*;
+import ru.kulikovskiy.spotservice.model.SpotRequest;
+import ru.kulikovskiy.spotservice.service.SpotProvider;
 
-import java.util.Arrays;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping(value = "/spot")
+@Slf4j
+@RequiredArgsConstructor
 public class SpotController {
+    private final SpotProvider spotProvider;
 
-    @RequestMapping(value = "/loadAll", method = RequestMethod.GET)
-    public ResponseEntity<JkhDataLoaderAllResponse> loadAll() {
-        JkhDataLoaderAllResponse response = streetService.getAllStreetsJkh();
-        return ResponseEntity.ok(response);
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity add(@RequestBody SpotRequest spotRequest) {
+        if ((spotRequest != null) && (spotRequest.getCcypair() != null) && (spotRequest.getDate() != null)) {
+            LocalDateTime tickTime = getLocalDateTime(spotRequest.getDate());
+            spotProvider.add(spotRequest.getCcypair(), spotRequest.getSpot(), tickTime);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    @RequestMapping(value = "/getBean",method = RequestMethod.GET)
-    public @ResponseBody List<String> getBeanList() {
-        return Arrays.asList(appContext.getBeanDefinitionNames());
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity get(@RequestParam String ccypair,
+                              @RequestParam String date) {
+        if ((ccypair != null) && (date != null)) {
+            LocalDateTime tickTime = getLocalDateTime(date);
+            spotProvider.get(ccypair, tickTime);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    private LocalDateTime getLocalDateTime(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime tickTime = LocalDateTime.parse(date, formatter);
+        return tickTime;
     }
 }
